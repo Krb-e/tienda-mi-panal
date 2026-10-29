@@ -345,7 +345,8 @@ async function sb(table,cols,dateCol,from,to){
   for(;;){
     let url=SUPABASE_URL+'/rest/v1/'+table+'?select='+encodeURIComponent(cols)+'&limit='+pg+'&offset='+off;
     if(dateCol&&from) url+='&'+dateCol+'=gte.'+from+'&'+dateCol+'=lte.'+to;
-    if(dateCol) url+='&order='+dateCol+'.asc';
+    // desempate por id: con >1000 filas y fechas repetidas, offset sin orden único duplica/saltea filas entre páginas
+    if(dateCol) url+='&order='+dateCol+'.asc,id.asc';
     let r; try{ r=await fetch(url,{headers:HDR}); }catch(e){console.warn('[KE] '+table+' fetch error',e);return out;}
     if(!r.ok){console.warn('[KE] '+table+' '+r.status+' — fuente ignorada');return out;}
     const rows=await r.json(); out=out.concat(rows);
